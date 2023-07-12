@@ -1,0 +1,26 @@
+[INFO] RunEMOA, M=2 time_limit = 60
+JVM load succeeded: Version 4.0
+[INFO] EMOA::_PostProcRes...
+[INFO] EMOA::Search exit.
+----EMOA* reprint solutions for more clarity:
+ path nodes = 0, 3, 6, 7, 8,
+ cost = [4,6,]
+ nDomCheck = 16
+ path nodes = 0, 1, 2, 5, 8,
+ cost = [6,4,]
+ nDomCheck = 16
+num_nodes: 4
+num_edges: 10
+cdims: 2
+g.GetCost(1, 2): [1,10,]
+g.GetCost(1, 3): [9,4,]
+[INFO] RunEMOA, M=2 time_limit = 60
+[INFO] EMOA::_PostProcRes...
+[INFO] EMOA::Search exit.
+---- reprint solutions for more clarity:
+ path nodes = 1, 2, 3, 4,
+ cost = [10,25,]
+ path nodes = 1, 2, 4,
+ cost = [11,13,]
+ path nodes = 1, 3, 2, 4,
+ cost = [24,12,]
