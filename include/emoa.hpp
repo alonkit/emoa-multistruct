@@ -116,12 +116,15 @@ private:
     static JavaVM* jvm;                      // Pointer to the JVM (Java Virtual Machine)
     static JNIEnv* env;                      // Pointer to native interface
     jobject jmgr;
-    jclass Solution;
-    jmethodID SolutionInit;
-    jmethodID jcheck;
-    jmethodID jupdate;
-    jmethodID jsize;
-    jmethodID jfitness;
+    static jclass Solution;
+    static jclass Mgr;
+
+    static jmethodID MgrInit;
+    static jmethodID SolutionInit;
+    static jmethodID jcheck;
+    static jmethodID jupdate;
+    static jmethodID jsize;
+    static jmethodID jfitness;
 
 public:
     Frontier3d();

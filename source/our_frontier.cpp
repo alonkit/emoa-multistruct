@@ -1,21 +1,39 @@
 //https://www.codeproject.com/articles/993067/calling-java-from-cplusplus-with-jni
+//https://www.codeproject.com/Tips/1129615/JNI-Signature-for-Java-Method
 
 #include "emoa.hpp"
 
 JavaVM* rzq::search::Frontier3d::jvm = nullptr;
 JNIEnv* rzq::search::Frontier3d::env = nullptr;
 
+jclass rzq::search::Frontier3d::Solution = nullptr;
+jclass rzq::search::Frontier3d::Mgr = nullptr;
+
+jmethodID rzq::search::Frontier3d::MgrInit = nullptr;
+jmethodID rzq::search::Frontier3d::SolutionInit = nullptr;
+jmethodID rzq::search::Frontier3d::jcheck = nullptr;
+jmethodID rzq::search::Frontier3d::jupdate = nullptr;
+jmethodID rzq::search::Frontier3d::jsize = nullptr;
+jmethodID rzq::search::Frontier3d::jfitness = nullptr;
+
+
 rzq::search::Frontier3d::~Frontier3d() {
     return;
 };
 
+enum Types {MTQuadTree1, LinearListManager, BSPTreeArchiveManager, NDTree};
 
 rzq::search::Frontier3d::Frontier3d()
 {
+
+    // change this :
+    Types type = NDTree;
+
+
     if (jvm == nullptr) {
         JavaVMInitArgs vm_args;                        // Initialization arguments
         JavaVMOption* options = new JavaVMOption[1];   // JVM invocation options
-        options[0].optionString = (char*)"-Djava.class.path=C:\\Users\\alonk\\technion\\a-project\\multiobjective_data_structures";   // where to find java .class
+        options[0].optionString = (char*)"-Djava.class.path=C:\\Users\\alonk\\technion\\a-project\\emoa-multistruct";   // where to find java .class
         vm_args.version = JNI_VERSION_1_6;             // minimum Java version
         vm_args.nOptions = 1;                          // number of options
         vm_args.options = options;
@@ -32,20 +50,82 @@ rzq::search::Frontier3d::Frontier3d()
         std::cout << "JVM load succeeded: Version ";
         jint ver = env->GetVersion();
         std::cout << ((ver >> 16) & 0x0f) << "." << (ver & 0x0f) << std::endl;  
+
+        Solution = env->FindClass("multiobjective_data_structures/implementations/tests/ProxySolution");
+        SolutionInit = env->GetMethodID(Solution, "<init>", "([D)V");
+        jfitness = env->GetMethodID(Solution, "getFitness", "(I)D");
+
+
+        switch (type)
+        {
+        case MTQuadTree1:{
+                Mgr = env->FindClass("multiobjective_data_structures/implementations/MTQuadTree1");
+                MgrInit = env->GetMethodID(Mgr, "<init>", "(I)V");
+                break;
+            }
+        case LinearListManager:{
+            Mgr = env->FindClass("multiobjective_data_structures/implementations/LinearListManager");
+            MgrInit = env->GetMethodID(Mgr, "<init>", "(JIZ)V");
+            break;
+        }
+        case BSPTreeArchiveManager: {
+            Mgr = env->FindClass("multiobjective_data_structures/implementations/BSPTreeArchiveManager");
+            MgrInit = env->GetMethodID(Mgr, "<init>", "(I)V");
+            break;
+        }
+        case NDTree: {
+            Mgr = env->FindClass("multiobjective_data_structures/implementations/NDTree");
+            MgrInit = env->GetMethodID(Mgr, "<init>", "(I)V");
+            break;
+        }
+        default:
+            break;
+        }
+        
+        
+        jcheck = env->GetMethodID(Mgr, "weaklyDominates", "(Lmultiobjective_data_structures/Solution;)Z");
+        jupdate = env->GetMethodID(Mgr, "add", "(Lmultiobjective_data_structures/Solution;)Z");
+        jsize = env->GetMethodID(Mgr, "size", "()I");
+    
+
+        if (jsize == nullptr) exit(1);
+        if (jcheck == nullptr) exit(2);
+        if (jupdate == nullptr) exit(3);
+        if (jfitness == nullptr) exit(4);
+        if (SolutionInit == nullptr) exit(5);
+        if (MgrInit== nullptr) exit(6);
     }
 
 
-    Solution = env->FindClass("multiobjective_data_structures/implementations/tests/ProxySolution");
-    SolutionInit = env->GetMethodID(Solution, "<init>", "([D)V");
-    jfitness = env->GetMethodID(Solution, "getFitness", "(I)D");
-
-    auto mgrClass = env->FindClass("multiobjective_data_structures/implementations/MTQuadTree1");
-    auto mgrInit = env->GetMethodID(mgrClass, "<init>", "(I)V");
-    jmgr = env->NewObject(mgrClass, mgrInit, (jint)3);
-    jcheck = env->GetMethodID(mgrClass, "weaklyDominates", "(Lmultiobjective_data_structures/Solution;)Z");
-    jupdate = env->GetMethodID(mgrClass, "add", "(Lmultiobjective_data_structures/Solution;)Z");
-    jsize = env->GetMethodID(mgrClass, "size", "()I");
     
+    
+    switch (type)
+    {
+    case MTQuadTree1: {
+        // change 3rd value to amount of weights per edge
+        jmgr = env->NewObject(Mgr, MgrInit, (jint)3);
+        break;
+    }
+    case LinearListManager: {
+        // change 4rd value to amount of weights per edge
+        jmgr = env->NewObject(Mgr, MgrInit, (jlong)42, (jint)2, (jboolean)true);
+        break;
+    }
+    case BSPTreeArchiveManager: {
+        // change 3rd value to amount of weights per edge
+        jmgr = env->NewObject(Mgr, MgrInit, (jint)2);
+        break;
+    }
+    case NDTree: {
+        // change 3rd value to amount of weights per edge
+        jmgr = env->NewObject(Mgr, MgrInit, (jint)2);
+        break;
+    }
+
+    default:
+        break;
+    }
+
 
     int x = 5;
 
@@ -71,17 +151,17 @@ std::vector<float> rzq::search::Frontier3d::solutionToCostVec(jobject solution)
 }
 
 bool rzq::search::Frontier3d::Check(basic::CostVector g) {
-    std::cout << "--check " << (int)env->CallIntMethod(jmgr,jsize)<< g;
+    //std::cout << "--check " << (int)env->CallIntMethod(jmgr,jsize)<< g;
     jobject solution = costVecToSolution(g);
 
     
     jboolean res = env->CallBooleanMethod(jmgr, jcheck, solution);
-    std::cout << " res: " << (bool)res << std::endl;
+    //std::cout << " res: " << (bool)res << std::endl;
     return (bool)res;
 }
 
 void rzq::search::Frontier3d::Update(Label l) {
-    std::cout << "--update " << l.g<< std::endl;
+    //std::cout << "--update " << l.g<< std::endl;
     label_ids.insert(l.id);
     auto pg = l.g;
     jobject solution = costVecToSolution(pg);
