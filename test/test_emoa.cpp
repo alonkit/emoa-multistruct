@@ -134,7 +134,7 @@ int TestRoadmapToy() {
   double time_limit = 60; // e.g. one minute search time limit.
 
   rzq::search::EMOAResult res;
-  rzq::search::RunEMOA(&g, vo, vd, time_limit,"LinearListManager", & res);
+  rzq::search::RunEMOA(&g, vo, vd, time_limit,"MTQuadTree1", & res);
 
   // print paths, times and costs
   std::cout << "---- reprint solutions for more clarity:" << std::endl;

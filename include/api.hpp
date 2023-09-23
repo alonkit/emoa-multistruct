@@ -24,7 +24,7 @@ namespace search{
 int RunEMOA(basic::Graph* g, long vo, long vd, double time_limit, std::string pareto_type, rzq::search::EMOAResult* res) {
 
   size_t cdim = g->GetCostDim();
-
+  rzq::search::Frontier3d::Set_pareto_set(pareto_type);
   std::cout << "[INFO] RunEMOA, M=" << cdim << " time_limit = " << time_limit << std::endl;
   int ret_flag = 0;
 
