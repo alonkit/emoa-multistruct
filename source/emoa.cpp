@@ -9,6 +9,7 @@
 #include <set>
 #include <memory>
 #include <chrono>
+#include<tuple>
 
 namespace rzq{
 namespace search{
@@ -199,7 +200,8 @@ FrontierKd::~FrontierKd() {
 
 //////////////////////////////////////////////////////////
 
-EMOA::EMOA() {};
+EMOA::EMOA() {
+};
 
 EMOA::~EMOA() {
   // for (auto k :_alpha) { // free all frontier that are newed.
@@ -232,6 +234,7 @@ int EMOA::Search(long vo, long vd, double time_limit) {
 
   // ### init ###
   auto tstart = std::chrono::steady_clock::now();
+  sol_time = std::chrono::steady_clock::now();
   _vo = vo;
   _vd = vd;
   basic::CostVector zero_vec;
@@ -452,6 +455,22 @@ void EMOAKd::_UpdateFrontier(Label l) {
   // }
   // ptr->Update(l);
   _alpha[l.v].Update(l);
+
+  if (l.v == _vd) {
+      auto tnow = std::chrono::steady_clock::now();
+      int sum = 0;
+      for (const auto& tup : _alpha) {
+          auto& front = tup.second;
+          sum += front.Size();
+      }
+      int avg = sum / _alpha.size();
+      auto duration = std::chrono::duration_cast<std::chrono::microseconds>(tnow - sol_time);
+      long long microseconds = duration.count();
+      _res.sol_timetable.push_back(std::tuple<int, long long>(avg, microseconds));
+      sol_time = std::chrono::steady_clock::now();
+
+  }
+
 
   // debug info below
   if (DEBUG_EMOA > 0) {

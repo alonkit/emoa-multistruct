@@ -27,7 +27,7 @@ int main(){
     //fr.Update(rzq::search::Label(1, 1, rzq::basic::CostVector({ 1,3,3 }), rzq::basic::CostVector({ 1,3,3 })));
 
     //return 0;
-  TestGridToy();
+  //TestGridToy();
   TestRoadmapToy();
   return 0;
 };
@@ -62,7 +62,7 @@ int TestGridToy() {
   double time_limit = 60; // seconds
 
   rzq::search::EMOAResult res;
-  rzq::search::RunEMOA(&g, vo, vd, time_limit, &res);
+  rzq::search::RunEMOA(&g, vo, vd, time_limit, "LinearListManager", &res);
 
   // print paths, times and costs
   std::cout << "----EMOA* reprint solutions for more clarity:" << std::endl;
@@ -134,7 +134,7 @@ int TestRoadmapToy() {
   double time_limit = 60; // e.g. one minute search time limit.
 
   rzq::search::EMOAResult res;
-  rzq::search::RunEMOA(&g, vo, vd, time_limit, &res);
+  rzq::search::RunEMOA(&g, vo, vd, time_limit,"LinearListManager", & res);
 
   // print paths, times and costs
   std::cout << "---- reprint solutions for more clarity:" << std::endl;

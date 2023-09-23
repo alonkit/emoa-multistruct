@@ -21,11 +21,14 @@ namespace search{
  * time_limit - the run time limit for search.
  * res - the output argument.
  */
-int RunEMOA(basic::Graph* g, long vo, long vd, double time_limit, rzq::search::EMOAResult* res) {
+int RunEMOA(basic::Graph* g, long vo, long vd, double time_limit, std::string pareto_type, rzq::search::EMOAResult* res) {
 
   size_t cdim = g->GetCostDim();
+
   std::cout << "[INFO] RunEMOA, M=" << cdim << " time_limit = " << time_limit << std::endl;
   int ret_flag = 0;
+
+  rzq::search::Frontier3d::dim = cdim;
 
   // The following if-else is actually minor. Just use EMOAKd for all cases is totally fine...
   if (cdim == 3) {

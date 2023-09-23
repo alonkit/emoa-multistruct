@@ -15,6 +15,8 @@
 #include <set>
 #include <limits>
 #include <list>
+#include <chrono>
+#include<tuple>
 
 
 
@@ -71,6 +73,8 @@ struct EMOAResult {
   double rt_initHeu = 0.0;
   double rt_search = 0.0;
   bool timeout = false;
+  std::vector < std::tuple<int, long long> >sol_timetable;
+
 };
 
 //////////////////////////////////////////////////////////////
@@ -111,6 +115,10 @@ protected:
 /**
  * @brief The frontier set at each node, for TOA* (Tri-objective A*).
  */
+
+enum Types { MTQuadTree1, LinearListManager, BSPTreeArchiveManager, NDTree };
+
+
 class Frontier3d : public Frontier {
 private:
     static JavaVM* jvm;                      // Pointer to the JVM (Java Virtual Machine)
@@ -126,9 +134,15 @@ private:
     static jmethodID jsize;
     static jmethodID jfitness;
 
+
 public:
+    static int dim;
+    static Types pareto_type;
+    static void Set_pareto_set(std::string s);
+
     Frontier3d();
     virtual ~Frontier3d();
+    int Size() const;
     virtual bool Check(basic::CostVector g) override;
     virtual void Update(Label l) override;
     virtual basic::CostVector _p(basic::CostVector v);
@@ -166,6 +180,7 @@ public:
    * Add to make it compatible with pybind11.
    */
   virtual void SetGrid(basic::GridkConn& g) ;
+
 protected:
   // return the heuristic vector from v to vd.
   virtual basic::CostVector _Heuristic(long v) ;
@@ -195,6 +210,9 @@ protected:
   // std::string _mode = ""; // for some special usage
 
   basic::GridkConn temp_g; // temp, to be removed.
+  int x = 0;
+  std::chrono::time_point<std::chrono::steady_clock> sol_time;
+
 };
 
 //////////////////////////////////////////////////////////////////

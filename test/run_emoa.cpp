@@ -35,14 +35,15 @@ int main( int argc, char *argv[] ) {
   double time_limit = std::stod(argv[3]);
   int M = std::stoi(argv[4]);
 
-  int expected_args = M + 6;
+  int expected_args = M + 7;
   if (argc != expected_args) {
     std::cout << "M=" << M << ", expected M+6 (" << expected_args << ") arguments, received " << argc << std::endl;
     return -1;
   }
 
   // get filenames
-  std::string result_fname = argv[argc - 1];
+  std::string result_fname = argv[argc - 2];
+  std::string pareto_set_name= argv[argc - 1];
   std::vector<std::string> input_fnames;
   for (int i = 0; i < M; i++) {
     input_fnames.push_back(argv[i + 5]);
@@ -75,7 +76,7 @@ int main( int argc, char *argv[] ) {
   // ######################################### //
 
   rzq::search::EMOAResult res;
-  rzq::search::RunEMOA(&g, vo, vd, time_limit, &res);
+  rzq::search::RunEMOA(&g, vo, vd, time_limit, pareto_set_name, &res);
 
   rzq::basic::SaveResultToFile(result_fname, load_graph_time, &res);
 
@@ -83,5 +84,6 @@ int main( int argc, char *argv[] ) {
 };
 
 void print_help_message () {
-  std::cout << "./run_emoa (arg1 v_start) (arg2 v_dest) (arg3 time_limit) (arg4 M) (arg5 graph1_path) (arg6 graph2_path) ... ((arg(M+4) graphM_path)) (arg(M+5) result_path)" << std::endl;
+    std::cout << "./run_emoa (arg1 v_start) (arg2 v_dest) (arg3 time_limit) (arg4 M) (arg5 graph1_path) (arg6 graph2_path) ... ((arg(M+4) graphM_path)) (arg(M+5) result_path) (arg(M+6) pareto_set) " << std::endl;
+    std::cout << "--pareto set is one of : MTQuadTree1, LinearListManager, BSPTreeArchiveManager, NDTree" << std::endl;
 }

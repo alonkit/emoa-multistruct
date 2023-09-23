@@ -17,17 +17,34 @@ jmethodID rzq::search::Frontier3d::jsize = nullptr;
 jmethodID rzq::search::Frontier3d::jfitness = nullptr;
 
 
+int rzq::search::Frontier3d::dim = 0;
+rzq::search::Types rzq::search::Frontier3d::pareto_type = LinearListManager;
+
+
 rzq::search::Frontier3d::~Frontier3d() {
     return;
 };
 
-enum Types {MTQuadTree1, LinearListManager, BSPTreeArchiveManager, NDTree};
+void rzq::search::Frontier3d::Set_pareto_set(std::string s) {
+    //MTQuadTree1, LinearListManager, BSPTreeArchiveManager, NDTree
+    
+    if (s == "MTQuadTree1") pareto_type = MTQuadTree1;
+    else if (s == "LinearListManager") pareto_type = LinearListManager;
+    else if (s == "BSPTreeArchiveManager") pareto_type = BSPTreeArchiveManager;
+    else if (s == "NDTree") pareto_type = NDTree;
+    else {
+        throw "no such pareto type";
+    }
+
+};
+
+
+
 
 rzq::search::Frontier3d::Frontier3d()
 {
 
     // change this :
-    Types type = NDTree;
 
 
     if (jvm == nullptr) {
@@ -56,7 +73,7 @@ rzq::search::Frontier3d::Frontier3d()
         jfitness = env->GetMethodID(Solution, "getFitness", "(I)D");
 
 
-        switch (type)
+        switch (pareto_type)
         {
         case MTQuadTree1:{
                 Mgr = env->FindClass("multiobjective_data_structures/implementations/MTQuadTree1");
@@ -99,26 +116,26 @@ rzq::search::Frontier3d::Frontier3d()
 
     
     
-    switch (type)
+    switch (pareto_type)
     {
     case MTQuadTree1: {
         // change 3rd value to amount of weights per edge
-        jmgr = env->NewObject(Mgr, MgrInit, (jint)3);
+        jmgr = env->NewObject(Mgr, MgrInit, (jint)dim);
         break;
     }
     case LinearListManager: {
         // change 4rd value to amount of weights per edge
-        jmgr = env->NewObject(Mgr, MgrInit, (jlong)42, (jint)2, (jboolean)true);
+        jmgr = env->NewObject(Mgr, MgrInit, (jlong)42, (jint)dim, (jboolean)true);
         break;
     }
     case BSPTreeArchiveManager: {
         // change 3rd value to amount of weights per edge
-        jmgr = env->NewObject(Mgr, MgrInit, (jint)2);
+        jmgr = env->NewObject(Mgr, MgrInit, (jint)dim);
         break;
     }
     case NDTree: {
         // change 3rd value to amount of weights per edge
-        jmgr = env->NewObject(Mgr, MgrInit, (jint)2);
+        jmgr = env->NewObject(Mgr, MgrInit, (jint)dim);
         break;
     }
 
@@ -148,6 +165,10 @@ jobject rzq::search::Frontier3d::costVecToSolution(basic::CostVector costs)
 std::vector<float> rzq::search::Frontier3d::solutionToCostVec(jobject solution)
 {
     return std::vector<float>();
+}
+
+int rzq::search::Frontier3d::Size() const {
+    return (int)env->CallIntMethod(jmgr, jsize);
 }
 
 bool rzq::search::Frontier3d::Check(basic::CostVector g) {

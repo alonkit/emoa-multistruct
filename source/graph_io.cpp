@@ -95,6 +95,7 @@ int ReadRoadmapFromFile(std::vector<std::string> edge_cost_fnames, bool add_degr
 };
 
 int SaveResultToFile(std::string fname, double time, search::EMOAResult* res) {
+
   std::ofstream fout;
 
   fout.open(fname);
@@ -102,7 +103,7 @@ int SaveResultToFile(std::string fname, double time, search::EMOAResult* res) {
     std::cerr << "Error: file '" << fname << "' could not be opened" << std::endl;
 		return -1;
   }
-
+  /*
 	fout << "graph_load_time: " << time << std::endl;
   fout << "n_generated: " << res->n_generated << std::endl;
   fout << "n_expanded: " << res->n_expanded << std::endl;
@@ -125,7 +126,11 @@ int SaveResultToFile(std::string fname, double time, search::EMOAResult* res) {
 		index += 1;
   }
 
-  return 1;
+  return 1;*/
+	for (const auto& kv : res->sol_timetable) {
+		fout << std::get<0>(kv) << ',' << std::get<1>(kv) << std::endl;
+	}
+
 }
 
 
